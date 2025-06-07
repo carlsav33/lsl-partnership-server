@@ -1,65 +1,40 @@
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>💍 Virtual Partnership Server</h1>
-    <p>This server handles partnership lookups and updates from Second Life or OpenSim scripts.</p>
-    <ul>
-      <li><code>/get_partner?PW=PASSWORD&User=UUID</code></li>
-      <li><code>/set_partner?PW=PASSWORD&User=UUID&Partner=UUID</code></li>
-    </ul>
-    <p>Status: ✅ Online</p>
-  `);
-});
 const express = require("express");
-const app = express();
-const port = process.env.PORT || 3000;
+const cors = require("cors");
 
+const app = express(); // ✅ define `app` BEFORE using it
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
 app.use(express.json());
 
-const PASSWORD = "l1zz4nn34PL4Yr1d3r";
+const PARTNER_DATA = {}; // simple in-memory storage
 
-let partnerships = {};
+// Health check
+app.get("/", (req, res) => {
+  res.send("LSL Partnership Server is alive!");
+});
 
-function checkPW(req, res) {
-  if (req.query.PW !== PASSWORD) {
-    res.status(401).send("Unauthorized: Invalid password");
-    return false;
-  }
-  return true;
-}
+// Set partner
+app.post("/set_partner", (req, res) => {
+  const { User, Partner, PW } = req.body;
+  if (PW !== process.env.PW) return res.status(403).send("Unauthorized");
 
+  PARTNER_DATA[User] = Partner;
+  PARTNER_DATA[Partner] = User;
+  res.send({ status: "ok", Partner });
+});
+
+// Get partner
 app.get("/get_partner", (req, res) => {
-  if (!checkPW(req, res)) return;
+  const { User, PW } = req.query;
+  if (PW !== process.env.PW) return res.status(403).send("Unauthorized");
 
-  const user = req.query.User;
-  if (!user) {
-    res.status(400).send("Bad Request: Missing User parameter");
-    return;
-  }
+  const partner = PARTNER_DATA[User];
+  if (!partner) return res.status(404).send("No partner found");
 
-  const partner = partnerships[user] || "";
-  res.send(partner);
+  res.send({ status: "ok", Partner: partner });
 });
 
-app.get("/set_partner", (req, res) => {
-  if (!checkPW(req, res)) return;
-
-  const user = req.query.User;
-  const partner = req.query.Partner;
-
-  if (!user || partner === undefined) {
-    res.status(400).send("Bad Request: Missing User or Partner parameter");
-    return;
-  }
-
-  if (partner === "") {
-    delete partnerships[user];
-  } else {
-    partnerships[user] = partner;
-  }
-
-  res.send("OK");
-});
-
-app.listen(port, () => {
-  console.log(`Partnership manager server running on port ${port}`);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
