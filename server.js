@@ -1,4 +1,14 @@
-
+app.get("/", (req, res) => {
+  res.send(`
+    <h1>💍 Virtual Partnership Server</h1>
+    <p>This server handles partnership lookups and updates from Second Life or OpenSim scripts.</p>
+    <ul>
+      <li><code>/get_partner?PW=PASSWORD&User=UUID</code></li>
+      <li><code>/set_partner?PW=PASSWORD&User=UUID&Partner=UUID</code></li>
+    </ul>
+    <p>Status: ✅ Online</p>
+  `);
+});
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 3000;
