@@ -1,12 +1,15 @@
-
 {
   "name": "lsl-partnership-server",
   "version": "1.0.0",
+  "description": "A simple partnership server for Second Life using LSL and Node.js.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "author": "carlsav33",
+  "license": "MIT",
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2"
   }
 }
